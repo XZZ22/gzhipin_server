@@ -41,6 +41,9 @@
 ##3)安装webstorm的mongodb插件: Mongo Plugin(免费工具还包括：robo3t)
 
 ##4)注册/登陆后台处理
+
   a)数据库数据操作模块: db/models.js
+
   b)路由器模块: routes/index.js
+
   c)使用postman测试接口
