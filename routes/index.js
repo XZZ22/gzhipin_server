@@ -73,6 +73,7 @@ router.post('/register',function (req,res) {
     }
   })
 })
+
 //登录路由
 router.post('/login',function (req,res) {
   //获取请求
@@ -83,12 +84,44 @@ router.post('/login',function (req,res) {
     if(userDoc){// 如果存在，返回成功的响应，
       //实现7天免登陆
       res.cookie('userid',userDoc._id,{maxAge:1000*60*60*24*7});
-      res.send({code:0,data:{_id:userDoc._id,username,type}})
+      res.send({code:0,data:{_id:userDoc._id,username}})
     }else{// 如果不存在，返回成功的响应，保存到数据库中，保存到cookie中，返回成功的响应
       res.send({code:1,msg:'用户名或者密码错误'})
     }
   })
 })
 
+//更新用户路由
+router.post('/update',function (req,res) {
+  //1、获取cookies中的userid，
+  const userid = req.cookies.userid;
+  // 2、如果没有，直接响应给用户重新登录的信息
+  if(!userid){
+    return res.send({code:1,msg:'请先登陆'})
+  }
+  //3、如果有，去数据库中查找相关的数据,更新数据
+  UserModel.findByIdAndUpdate({_id: userid},req.body,function (error,userDoc) {
+    //获取数据库中原来的数据
+    const {_id, username, type} = userDoc;
+    //合并用户数据
+    const data = Object.assign(req.body,{_id, username, type});
+    //返回响应成功的信息
+    return res.send({code:0,data});
+  })
+})
+
+//获取cookie中的userid，保持书信后仍然是登录的状态
+router.get('/user',function (req,res) {
+  //1、获取cookie中的userid
+  const userid = req.cookies.userid;
+  //2、如果 没有，返回登录界面
+  if(!userid){
+    return res.send({code: 1, msg: '请先登陆'})
+  }
+  //3、如果有，数据库中查找，返回响应成功
+  UserModel.findOne({_id: userid}, filter, function (err, user) {
+    return res.send({code: 0, data: user})
+  })
+})
 
 module.exports = router;
